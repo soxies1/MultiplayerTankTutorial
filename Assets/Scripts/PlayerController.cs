@@ -17,7 +17,10 @@ public class PlayerController : NetworkBehaviour {
 	NetworkStartPosition[] m_spawnPoints;
 
 	public GameObject m_spawnFX;
+
+    public int m_score;
 	
+
 	void Start () {
 		m_pHealth = GetComponent<PlayerHealth>();
 		m_pMotor = GetComponent<PlayerMotor>();
