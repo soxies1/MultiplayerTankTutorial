@@ -26,6 +26,8 @@ public class Bullet : NetworkBehaviour {
 
     public PlayerController m_owner;
 
+	public float m_delay = .03f; 
+
 	// Use this for initialization
 	void Start () {
 		m_allParticles = GetComponentsInChildren<ParticleSystem>().ToList();
@@ -35,6 +37,9 @@ public class Bullet : NetworkBehaviour {
 	}
 
 	IEnumerator SelfDestruct(){
+		m_collider.enabled = false;
+		yield return new WaitForSeconds(m_delay);
+		m_collider.enabled = true;
 		yield return new WaitForSeconds(m_lifetime);
 		Explode();
 	}

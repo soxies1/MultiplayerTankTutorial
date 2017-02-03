@@ -10,7 +10,7 @@ public class PlayerController : NetworkBehaviour {
 
 	PlayerHealth m_pHealth;
 	PlayerMotor m_pMotor;
-	PlayerSetup m_pSetup;
+	public PlayerSetup m_pSetup;
 	PlayerShoot m_pShoot;
 
 	Vector3 m_originalPosition;
@@ -67,7 +67,11 @@ public class PlayerController : NetworkBehaviour {
 	}
 
 	IEnumerator RespawnCoroutine(){
+		SpawnPoint oldSpawn = GetNearestSpawnPoint();
 		transform.position = GetRandomSpawnPosition();
+		if(oldSpawn != null){
+			oldSpawn.m_isOccupied = false;
+		}
 		m_pMotor.m_rigidbody.velocity = Vector3.zero;
 		yield return new WaitForSeconds(3f);
 		m_pHealth.Reset();
@@ -78,11 +82,42 @@ public class PlayerController : NetworkBehaviour {
 		}
 	}
 
+	SpawnPoint GetNearestSpawnPoint(){
+		Collider[] triggerColliders = Physics.OverlapSphere(transform.position, 3f, Physics.AllLayers, QueryTriggerInteraction.Collide);
+		foreach(Collider c in triggerColliders){
+			SpawnPoint spawnPoint = c.GetComponent<SpawnPoint>();
+			if(spawnPoint != null){
+				return spawnPoint;
+			}
+		}
+		return null;
+	}
+
 	Vector3 GetRandomSpawnPosition(){
 		if(m_spawnPoints != null){
 			if(m_spawnPoints.Length > 0){
-				NetworkStartPosition startPos = m_spawnPoints[Random.Range(0, m_spawnPoints.Length)];
-				return startPos.transform.position;
+				bool foundSpawner = false;
+
+				Vector3 newStartPosition = new Vector3();
+
+				float timeOut = Time.time + 2f;
+
+				while(!foundSpawner){
+					NetworkStartPosition startPos = m_spawnPoints[Random.Range(0, m_spawnPoints.Length)];
+					SpawnPoint spawnPoint = startPos.GetComponent<SpawnPoint>();
+
+					if(spawnPoint.m_isOccupied == false){
+						foundSpawner = true;
+						newStartPosition = startPos.transform.position;
+					}
+
+					if(Time.time >= timeOut){
+						foundSpawner = true;
+						newStartPosition = m_originalPosition;
+					}
+
+				}
+				return newStartPosition;
 			}
 		}
 		return m_originalPosition;

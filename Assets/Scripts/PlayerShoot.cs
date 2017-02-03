@@ -14,6 +14,10 @@ public class PlayerShoot : NetworkBehaviour {
 	bool m_isReloading;
 
 	public float m_reloadTime = 1f;
+
+	public ParticleSystem m_misfireEffect;
+
+	public LayerMask m_obstacleMask;
 	// Use this for initialization
 	void Start () {
 		m_shotsLeft = m_shotsPerBurst;
@@ -30,12 +34,28 @@ public class PlayerShoot : NetworkBehaviour {
 			return;
 		}
 
-		CmdShoot();
+        RaycastHit hit;
+		Vector3 center = new Vector3(transform.position.x, m_bulletSpawn.position.y, transform.position.z);
+		Vector3 dir = (m_bulletSpawn.position - center).normalized;
 
-		m_shotsLeft --;
+		if(Physics.SphereCast(center, .25f, dir, out hit, 2.5f, m_obstacleMask, QueryTriggerInteraction.Ignore)){
+			if(m_misfireEffect != null){
+				ParticleSystem effect = Instantiate(m_misfireEffect, hit.point, Quaternion.identity) as ParticleSystem;
+				effect.Stop();
+				effect.Play();
+				Destroy(effect, 3f);
+			}
+		}
 
-		if(m_shotsLeft <= 0){
-			StartCoroutine("Reload");
+		else{
+
+			CmdShoot();
+
+			m_shotsLeft --;
+
+			if(m_shotsLeft <= 0){
+				StartCoroutine("Reload");
+			}	
 		}
 	}
 
