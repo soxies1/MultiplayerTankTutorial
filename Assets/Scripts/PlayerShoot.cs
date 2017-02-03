@@ -18,19 +18,26 @@ public class PlayerShoot : NetworkBehaviour {
 	public ParticleSystem m_misfireEffect;
 
 	public LayerMask m_obstacleMask;
-	// Use this for initialization
+
+    bool m_canShoot = false;
+
 	void Start () {
 		m_shotsLeft = m_shotsPerBurst;
 		m_isReloading = false;
 	}
 	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    public void Enable()
+    {
+        m_canShoot = true;
+    }
 
-	public void Shoot(){
-		if(m_isReloading || m_bulletPrefab == null){
+    public void Disable()
+    {
+        m_canShoot = false;
+    }
+
+    public void Shoot(){
+		if(m_isReloading || m_bulletPrefab == null || !m_canShoot){
 			return;
 		}
 
@@ -68,7 +75,7 @@ public class PlayerShoot : NetworkBehaviour {
         bullet = rbody.gameObject.GetComponent<Bullet>();
 		if(rbody != null){
 			rbody.velocity = bullet.m_speed * m_bulletSpawn.transform.forward;
-            bullet.m_owner = GetComponent<PlayerController>();
+            bullet.m_owner = GetComponent<PlayerManager>();
 			NetworkServer.Spawn(rbody.gameObject);
 		}
 	}

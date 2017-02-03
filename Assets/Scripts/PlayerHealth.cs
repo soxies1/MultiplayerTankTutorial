@@ -14,7 +14,7 @@ public class PlayerHealth : NetworkBehaviour {
 
 	public RectTransform m_healthBar;
 
-    public PlayerController m_lastAttacker;
+    public PlayerManager m_lastAttacker;
 
 	// Use this for initialization
 	void Start () {
@@ -32,12 +32,12 @@ public class PlayerHealth : NetworkBehaviour {
 		}
 	}
 
-	public void Damage(float damage, PlayerController pc = null){
+	public void Damage(float damage, PlayerManager pc = null){
 		if(!isServer){
 			return;
 		}
 
-        if(pc != null && this.GetComponent<PlayerController>() != pc)
+        if(pc != null && this.GetComponent<PlayerManager>() != pc)
         {
             m_lastAttacker = pc;
         }
@@ -48,7 +48,7 @@ public class PlayerHealth : NetworkBehaviour {
                 m_lastAttacker.m_score++;
                 m_lastAttacker = null;
             }
-            GameManager.Instance.UpdateScoreboard();
+            //GameManager.Instance.UpdateScoreboard();
 			m_isDead = true;
 			RpcDie(); 
 		}
@@ -60,7 +60,7 @@ public class PlayerHealth : NetworkBehaviour {
 			 GameObject.Destroy(deathFX, 3.0f);
 		 }
 		 SetActiveState(false);
-		 gameObject.SendMessage("Disable");
+		 gameObject.SendMessage("Respawn");
 	}
 
 	void SetActiveState(bool state){

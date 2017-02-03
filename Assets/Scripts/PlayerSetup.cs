@@ -3,32 +3,32 @@ using UnityEngine.UI;
 using UnityEngine.Networking;
 using System.Collections;
 
-public class PlayerSetup : NetworkBehaviour {
+public class PlayerSetup : NetworkBehaviour
+{
 
     [SyncVar(hook="UpdateColor")]
 	public Color m_playerColor;
-	public string m_basename = "PLAYER";
-    
-    [SyncVar(hook ="UpdateName")]
-    public int m_playerNum = 1;
-	public Text m_playerNameText;
 
-    void Start()
-    {
-        if (!isLocalPlayer)
-        {
-            UpdateName(m_playerNum);
-            UpdateColor(m_playerColor);
-        }
-    }
+    [SyncVar(hook ="UpdateName")]
+	public string m_name = "PLAYER";
+    
+	public Text m_playerNameText;
 
 	public override void OnStartClient(){
 		base.OnStartClient();
+        if (!isServer)
+        {
+            PlayerManager pManager = GetComponent<PlayerManager>();
 
-		if(m_playerNameText != null){
-			m_playerNameText.enabled = false;
-		}
-	}
+            if (pManager != null)
+            {
+                GameManager.m_allPlayers.Add(pManager);
+            }
+        }
+
+        UpdateName(m_name);
+        UpdateColor(m_playerColor);
+    }
 
     void UpdateColor(Color pColor)
     {
@@ -38,28 +38,11 @@ public class PlayerSetup : NetworkBehaviour {
 		}
     }
 
-    void UpdateName(int pNum)
+    void UpdateName(string pName)
     {
         if(m_playerNameText != null){
 			m_playerNameText.enabled = true;
-			m_playerNameText.text = m_basename + pNum.ToString(); 
+            m_playerNameText.text = pName; 
 		}
-    }
-
-	public override void OnStartLocalPlayer(){
-		base.OnStartLocalPlayer();
-
-        //UpdateColor();
-
-        //UpdateName();
-
-        CmdSetupPlayer();
-	}
-
-    [Command]
-    void CmdSetupPlayer()
-    {
-        GameManager.Instance.AddPlayer(this);
-        GameManager.Instance.m_playerCount++;
     }
 }
