@@ -21,11 +21,6 @@ public class PlayerHealth : NetworkBehaviour {
 		Reset();
 	}
 	
-	// Update is called once per frame
-	void Update () {
-	
-	}
-
 	void UpdateHealthBar(float value){
 		if(m_healthBar != null){
 			m_healthBar.sizeDelta = new Vector2(value/m_maxHealth*150f, m_healthBar.sizeDelta.y);
@@ -48,7 +43,7 @@ public class PlayerHealth : NetworkBehaviour {
                 m_lastAttacker.m_score++;
                 m_lastAttacker = null;
             }
-            //GameManager.Instance.UpdateScoreboard();
+            GameManager.Instance.UpdateScoreboard();
 			m_isDead = true;
 			RpcDie(); 
 		}

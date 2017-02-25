@@ -80,14 +80,14 @@ public class GameManager : NetworkBehaviour {
     {
         Reset();
         RpcStartGame();
-		yield return new WaitForSeconds(3f);
+        UpdateScoreboard();
+        yield return new WaitForSeconds(3f);
 	}
 
     [ClientRpc]
     void RpcPlayGame()
     {
         EnablePlayers();
-        //UpdateScoreboard();
         UpdateMessage("");
     }
 
@@ -137,23 +137,40 @@ public class GameManager : NetworkBehaviour {
             }
         }
     }
-    /*
+    
     [ClientRpc]
     void RpcUpdateScoreboard(string[] playerNames, int[] playerScores)
     {
-        for(int i=0; i < m_playerCount; i++)
+        for (int i = 0; i < m_allPlayers.Count; i++)
         {
-            if(playerNames[i] != null)
+            if (playerNames[i] != null)
             {
                 m_playerNameText[i].text = playerNames[i];
             }
-            if(playerScores[i] != null)
+            if (playerScores[i] != null)
             {
                 m_playerScoreText[i].text = playerScores[i].ToString();
             }
         }
     }
-*/
+
+    [Server]
+    public void UpdateScoreboard()
+    {
+        string[] pNames = new string[m_allPlayers.Count];
+        int[] pScores = new int[m_allPlayers.Count];
+
+        for (int i = 0; i < m_allPlayers.Count; i++)
+        {
+            if (m_allPlayers[i] != null)
+            {
+                pNames[i] = m_allPlayers[i].GetComponent<PlayerSetup>().m_name;
+                pScores[i] = m_allPlayers[i].m_score;
+            }
+        }
+        RpcUpdateScoreboard(pNames, pScores);
+    }
+
     public void CheckScores()
     {
         m_winner = GetWinner();
